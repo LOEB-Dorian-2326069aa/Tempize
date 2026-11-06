@@ -1,0 +1,71 @@
+# =============================================================================
+# Tempize — Render Blueprint (Déploiement Cloud automatisé)
+# =============================================================================
+# Ce fichier configure automatiquement l'API NestJS, PostgreSQL et Redis.
+# Rendez-vous sur dashboard.render.com > "New +" > "Blueprint" > Sélectionnez ce repo.
+# =============================================================================
+
+services:
+  # ── API NestJS ─────────────────────────────────────────────────────────────
+  - type: web
+    name: tempize-backend-api
+    runtime: node
+    rootDir: backend
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:prod
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: API_PREFIX
+        value: api/v1
+      - key: POSTGRES_HOST
+        fromDatabase:
+          name: tempize-postgres-db
+          property: host
+      - key: POSTGRES_PORT
+        fromDatabase:
+          name: tempize-postgres-db
+          property: port
+      - key: POSTGRES_USER
+        fromDatabase:
+          name: tempize-postgres-db
+          property: user
+      - key: POSTGRES_PASSWORD
+        fromDatabase:
+          name: tempize-postgres-db
+          property: password
+      - key: POSTGRES_DB
+        fromDatabase:
+          name: tempize-postgres-db
+          property: database
+      - key: REDIS_HOST
+        fromService:
+          type: redis
+          name: tempize-redis-cache
+          property: host
+      - key: REDIS_PORT
+        fromService:
+          type: redis
+          name: tempize-redis-cache
+          property: port
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+
+  # ── Redis Cache ────────────────────────────────────────────────────────────
+  - type: redis
+    name: tempize-redis-cache
+    plan: free
+    ipAllowList: [] # Access interne sécurisé réservé aux services Render
+
+# ── Base de Données Managée ──────────────────────────────────────────────────
+databases:
+  - name: tempize-postgres-db
+    databaseName: tempize_db
+    user: tempize
+    plan: free
+    postgresMajorVersion: 16

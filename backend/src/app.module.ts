@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeOrmAsyncConfig } from './config/database.config';
 import { RedisModule } from './config/redis.module';
 import { HealthModule } from './modules/health/health.module';
+import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { TagsModule } from './modules/tags/tags.module';
 import { EventsModule } from './modules/events/events.module';
@@ -21,6 +22,7 @@ import { ReviewsModule } from './modules/reviews/reviews.module';
     TypeOrmModule.forRootAsync(typeOrmAsyncConfig),
     RedisModule,
     HealthModule,
+    AuthModule,
     UsersModule,
     TagsModule,
     EventsModule,

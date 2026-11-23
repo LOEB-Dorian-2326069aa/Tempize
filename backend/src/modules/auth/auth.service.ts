@@ -34,13 +34,6 @@ export class AuthService {
       throw new ConflictException('Un utilisateur avec cet email existe déjà');
     }
 
-    const existingPseudo = await this.userRepository.findOne({
-      where: { pseudo: dto.pseudo },
-    });
-    if (existingPseudo) {
-      throw new ConflictException('Ce pseudo est déjà pris');
-    }
-
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(dto.mot_de_passe, saltRounds);
 
@@ -49,8 +42,11 @@ export class AuthService {
       tags = await this.tagRepository.findBy({ id_tag: In(dto.tag_ids) });
     }
 
+    const displayName = (dto.nom || dto.pseudo || 'Utilisateur').trim();
+
     const user = this.userRepository.create({
-      pseudo: dto.pseudo,
+      nom: displayName,
+      pseudo: dto.pseudo?.trim() || displayName,
       email: dto.email.toLowerCase(),
       mot_de_passe: hashedPassword,
       bio: dto.bio,
@@ -119,7 +115,8 @@ export class AuthService {
     const payload = {
       sub: user.id_utilisateur,
       email: user.email,
-      pseudo: user.pseudo,
+      nom: user.nom || user.pseudo,
+      pseudo: user.pseudo || user.nom,
       est_premium: user.est_premium,
     };
     return this.jwtService.sign(payload);

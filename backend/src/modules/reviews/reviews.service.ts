@@ -136,7 +136,8 @@ export class ReviewsService {
         note: r.note_organisateur,
         commentaire: r.commentaire,
         date: r.date_avis,
-        auteur_pseudo: r.auteur ? r.auteur.pseudo : 'Anonyme',
+        auteur_nom: r.auteur ? (r.auteur.nom || r.auteur.pseudo) : 'Anonyme',
+        auteur_pseudo: r.auteur ? (r.auteur.nom || r.auteur.pseudo) : 'Anonyme',
       })),
     };
   }

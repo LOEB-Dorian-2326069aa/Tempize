@@ -30,8 +30,8 @@ export default function TabsLayout() {
         options={{
           title: 'Découvrir',
           headerTitle: 'Tempize',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="flame" size={size} color={color} />
+          tabBarIcon: (props: any) => (
+            <Ionicons name="flame" size={props.size} color={props.color} />
           ),
         }}
       />
@@ -40,8 +40,8 @@ export default function TabsLayout() {
         options={{
           title: 'Carte',
           headerTitle: 'Événements autour de moi',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="map" size={size} color={color} />
+          tabBarIcon: (props: any) => (
+            <Ionicons name="map" size={props.size} color={props.color} />
           ),
         }}
       />
@@ -50,8 +50,8 @@ export default function TabsLayout() {
         options={{
           title: 'Mes Sorties',
           headerTitle: 'Mes Événements',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="calendar" size={size} color={color} />
+          tabBarIcon: (props: any) => (
+            <Ionicons name="calendar" size={props.size} color={props.color} />
           ),
         }}
       />
@@ -60,8 +60,8 @@ export default function TabsLayout() {
         options={{
           title: 'Profil',
           headerTitle: 'Mon Profil',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person" size={size} color={color} />
+          tabBarIcon: (props: any) => (
+            <Ionicons name="person" size={props.size} color={props.color} />
           ),
         }}
       />

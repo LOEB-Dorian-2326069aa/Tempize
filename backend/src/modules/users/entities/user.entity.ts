@@ -22,7 +22,10 @@ export class User {
   @PrimaryGeneratedColumn({ name: 'id_utilisateur' })
   id_utilisateur: number;
 
-  @Column({ name: 'pseudo', type: 'varchar', length: 50, unique: true })
+  @Column({ name: 'nom', type: 'varchar', length: 100, nullable: true })
+  nom: string;
+
+  @Column({ name: 'pseudo', type: 'varchar', length: 50, nullable: true })
   pseudo: string;
 
   @Column({ name: 'email', type: 'varchar', length: 255, unique: true })

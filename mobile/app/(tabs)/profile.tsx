@@ -20,7 +20,7 @@ export default function ProfileScreen() {
         <View style={styles.avatarContainer}>
           <Ionicons name="person" size={48} color="#FFF" />
         </View>
-        <Text style={styles.userName}>{user?.nom || user?.pseudo || 'Mon Profil'}</Text>
+        <Text style={styles.userName}>{user?.prenom || user?.nom || user?.pseudo || 'Mon Profil'}</Text>
         <Text style={styles.userEmail}>{user?.email || ''}</Text>
         {user?.bio ? <Text style={styles.userBio}>{user.bio}</Text> : null}
 

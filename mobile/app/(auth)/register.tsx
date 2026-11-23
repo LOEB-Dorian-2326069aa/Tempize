@@ -15,7 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 export default function RegisterScreen() {
   const router = useRouter();
 
-  const [nom, setNom] = useState('');
+  const [prenom, setPrenom] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -25,13 +25,13 @@ export default function RegisterScreen() {
   const handleNext = () => {
     setError(null);
 
-    if (!nom.trim() || !email.trim() || !password) {
+    if (!prenom.trim() || !email.trim() || !password) {
       setError('Veuillez remplir tous les champs obligatoires.');
       return;
     }
 
-    if (nom.trim().length < 2) {
-      setError('Le nom doit contenir au moins 2 caractères.');
+    if (prenom.trim().length < 2) {
+      setError('Le prénom doit contenir au moins 2 caractères.');
       return;
     }
 
@@ -54,7 +54,7 @@ export default function RegisterScreen() {
     router.push({
       pathname: '/(auth)/onboarding',
       params: {
-        nom: nom.trim(),
+        prenom: prenom.trim(),
         email: email.trim().toLowerCase(),
         password,
         bio: bio.trim(),
@@ -86,18 +86,18 @@ export default function RegisterScreen() {
             </View>
           )}
 
-          {/* Nom complet */}
+          {/* Prénom */}
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Nom complet *</Text>
+            <Text style={styles.label}>Prénom *</Text>
             <View style={styles.inputWrapper}>
               <Ionicons name="person-outline" size={20} color="#888" style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
-                placeholder="ex: Lucas Martin"
+                placeholder="ex: Lucas"
                 placeholderTextColor="#666"
-                value={nom}
+                value={prenom}
                 onChangeText={(text) => {
-                  setNom(text);
+                  setPrenom(text);
                   if (error) setError(null);
                 }}
               />

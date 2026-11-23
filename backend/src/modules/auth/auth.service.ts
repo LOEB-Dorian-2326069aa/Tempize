@@ -42,10 +42,11 @@ export class AuthService {
       tags = await this.tagRepository.findBy({ id_tag: In(dto.tag_ids) });
     }
 
-    const displayName = (dto.nom || dto.pseudo || 'Utilisateur').trim();
+    const displayName = (dto.prenom || dto.nom || dto.pseudo || 'Utilisateur').trim();
 
     const user = this.userRepository.create({
-      nom: displayName,
+      prenom: displayName,
+      nom: dto.nom?.trim() || displayName,
       pseudo: dto.pseudo?.trim() || displayName,
       email: dto.email.toLowerCase(),
       mot_de_passe: hashedPassword,
@@ -115,8 +116,9 @@ export class AuthService {
     const payload = {
       sub: user.id_utilisateur,
       email: user.email,
-      nom: user.nom || user.pseudo,
-      pseudo: user.pseudo || user.nom,
+      prenom: user.prenom || user.nom || user.pseudo,
+      nom: user.nom || user.prenom || user.pseudo,
+      pseudo: user.pseudo || user.prenom || user.nom,
       est_premium: user.est_premium,
     };
     return this.jwtService.sign(payload);

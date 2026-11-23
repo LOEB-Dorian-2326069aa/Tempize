@@ -37,6 +37,7 @@ const DEFAULT_TAGS: TagItem[] = [
 export default function OnboardingScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{
+    prenom?: string;
     nom?: string;
     pseudo?: string;
     email: string;
@@ -81,10 +82,11 @@ export default function OnboardingScreen() {
     }
 
     try {
-      const nomComplet = params.nom || params.pseudo || 'Utilisateur';
+      const userPrenom = params.prenom || params.nom || params.pseudo || 'Utilisateur';
       await register({
-        nom: nomComplet,
-        pseudo: nomComplet,
+        prenom: userPrenom,
+        nom: userPrenom,
+        pseudo: userPrenom,
         email: params.email || '',
         mot_de_passe: params.password || '',
         bio: params.bio,

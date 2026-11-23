@@ -12,12 +12,17 @@ import {
 } from 'class-validator';
 
 export class RegisterDto {
-  @ApiProperty({ example: 'Lucas Martin', description: 'Nom complet de l’utilisateur' })
+  @ApiProperty({ example: 'Lucas', description: 'Prénom de l’utilisateur' })
   @IsString()
   @IsNotEmpty()
   @MinLength(2)
-  @MaxLength(100)
-  nom: string;
+  @MaxLength(50)
+  prenom: string;
+
+  @ApiPropertyOptional({ example: 'Martin', description: 'Nom de famille (optionnel)' })
+  @IsOptional()
+  @IsString()
+  nom?: string;
 
   @ApiPropertyOptional({ example: 'lucas_m', description: 'Pseudo ou surnom (optionnel)' })
   @IsOptional()

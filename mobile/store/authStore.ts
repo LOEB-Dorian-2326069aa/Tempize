@@ -8,6 +8,7 @@ export interface Tag {
 
 export interface UserProfile {
   id_utilisateur: number;
+  prenom?: string;
   nom?: string;
   pseudo?: string;
   email: string;
@@ -28,7 +29,8 @@ interface AuthState {
 
   login: (email: string, mot_de_passe: string) => Promise<void>;
   register: (data: {
-    nom: string;
+    prenom: string;
+    nom?: string;
     pseudo?: string;
     email: string;
     mot_de_passe: string;

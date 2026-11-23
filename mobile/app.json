@@ -27,7 +27,14 @@
     },
     "plugins": [
       "expo-router",
-      "expo-asset"
+      "expo-asset",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Tempize utilise votre position pour afficher les événements autour de vous.",
+          "locationWhenInUsePermission": "Tempize utilise votre position pour afficher les événements autour de vous."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

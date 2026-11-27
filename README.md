@@ -125,6 +125,14 @@ npm run web
 
 ---
 
+### Connexion Google (Web et mobile)
+
+Créez des identifiants OAuth Web, Android et iOS dans Google Cloud Console. Ajoutez leurs ID dans `mobile/.env` (`EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`, `EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID`, `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID`) et dans `backend/.env` (`GOOGLE_CLIENT_IDS`, séparés par des virgules). L’ID Web historique `EXPO_PUBLIC_GOOGLE_CLIENT_ID` reste accepté en repli pour le navigateur.
+
+Pour le Web, autorisez l’origine locale `http://localhost:8081` ainsi que le domaine de production dans le client OAuth Web. Pour les applications natives, configurez le nom de package Android et le bundle identifier iOS déjà déclarés dans `mobile/app.json`, puis lancez une development build (Expo Go ne connaît pas le schéma natif `tempize://`). Le backend valide le jeton Google avant de créer le compte ou de connecter l’utilisateur existant à la même adresse vérifiée.
+
+---
+
 ## 🌐 URLs des Services Locaux
 
 | Service | URL locale | Identifiants par défaut |

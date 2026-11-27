@@ -3,6 +3,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagg
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { GoogleLoginDto } from './dto/google-login.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
@@ -27,6 +28,15 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Identifiants invalides' })
   async login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
+  }
+
+  @Post('google')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Connexion ou inscription avec un compte Google' })
+  @ApiResponse({ status: 200, description: 'Connexion Google réussie et token Tempize retourné' })
+  @ApiResponse({ status: 401, description: 'Jeton Google invalide ou adresse email non vérifiée' })
+  async loginWithGoogle(@Body() dto: GoogleLoginDto) {
+    return this.authService.loginWithGoogle(dto.idToken);
   }
 
   @Get('me')

@@ -7,9 +7,11 @@ import {
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import AppHeader from '../../components/AppHeader';
 import BottomNav from '../../components/BottomNav';
 import { Colors, Spacing, Typography, Radius, Shadows } from '../../constants/theme';
+import { useAuthStore } from '../../store/authStore';
 
 const INTERESTS = ['Sport', 'Jeux de société', 'Musique', 'Randonnée', 'Bar', 'Culture'];
 

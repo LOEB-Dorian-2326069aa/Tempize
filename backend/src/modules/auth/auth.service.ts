@@ -4,10 +4,13 @@ import {
   UnauthorizedException,
   NotFoundException,
   Logger,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import { OAuth2Client } from 'google-auth-library';
 import * as bcrypt from 'bcrypt';
 import { User } from '../users/entities/user.entity';
 import { Tag } from '../tags/entities/tag.entity';
@@ -24,6 +27,7 @@ export class AuthService {
     @InjectRepository(Tag)
     private readonly tagRepository: Repository<Tag>,
     private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -82,7 +86,7 @@ export class AuthService {
       .where('LOWER(user.email) = LOWER(:email)', { email: dto.email })
       .getOne();
 
-    if (!user) {
+    if (!user || !user.mot_de_passe) {
       throw new UnauthorizedException('Identifiants invalides');
     }
 
@@ -93,6 +97,80 @@ export class AuthService {
 
     const token = this.generateToken(user);
 
+    return {
+      access_token: token,
+      user: this.sanitizeUser(user),
+    };
+  }
+
+  async loginWithGoogle(idToken: string) {
+    const clientIds = (
+      this.configService.get<string>('GOOGLE_CLIENT_IDS') ||
+      this.configService.get<string>('GOOGLE_CLIENT_ID') ||
+      ''
+    )
+      .split(',')
+      .map((clientId) => clientId.trim())
+      .filter(Boolean);
+
+    if (clientIds.length === 0) {
+      throw new InternalServerErrorException('La connexion Google n’est pas configurée.');
+    }
+
+    const googleClient = new OAuth2Client();
+    let payload;
+    try {
+      const ticket = await googleClient.verifyIdToken({
+        idToken,
+        audience: clientIds,
+      });
+      payload = ticket.getPayload();
+    } catch {
+      throw new UnauthorizedException('Jeton Google invalide ou expiré.');
+    }
+
+    if (!payload?.sub || !payload.email || payload.email_verified !== true) {
+      throw new UnauthorizedException('Le compte Google doit avoir une adresse email vérifiée.');
+    }
+
+    const email = payload.email.toLowerCase();
+    let user = await this.userRepository.findOne({
+      where: { email },
+      relations: ['tags'],
+    });
+
+    if (!user) {
+      const fullName = payload.name?.trim() || '';
+      const prenom = (payload.given_name?.trim() || fullName.split(/\s+/)[0] || 'Utilisateur')
+        .slice(0, 50);
+      const localPart = email.split('@')[0];
+      const candidate = this.userRepository.create({
+        prenom,
+        nom: payload.family_name?.trim().slice(0, 100) || null,
+        pseudo: localPart.slice(0, 50),
+        email,
+        mot_de_passe: null,
+        photo: payload.picture?.slice(0, 255) || null,
+      });
+
+      try {
+        user = await this.userRepository.save(candidate);
+      } catch (error) {
+        if ((error as { code?: string }).code !== '23505') {
+          throw error;
+        }
+
+        user = await this.userRepository.findOne({
+          where: { email },
+          relations: ['tags'],
+        });
+        if (!user) {
+          throw error;
+        }
+      }
+    }
+
+    const token = this.generateToken(user);
     return {
       access_token: token,
       user: this.sanitizeUser(user),

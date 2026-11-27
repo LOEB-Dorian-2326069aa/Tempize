@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -12,16 +12,91 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import * as Google from 'expo-auth-session/providers/google';
 import { useAuthStore } from '../../store/authStore';
+
+const googleWebClientId =
+  process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ||
+  process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID;
+const googleAndroidClientId = process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID;
+const googleIosClientId = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID;
+const googleClientIdConfigured =
+  Platform.OS === 'web'
+    ? Boolean(googleWebClientId)
+    : Platform.OS === 'android'
+      ? Boolean(googleAndroidClientId)
+      : Boolean(googleIosClientId);
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { login, isLoading, error, clearError } = useAuthStore();
+  const { login, googleLogin, isLoading, error, clearError } = useAuthStore();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [googleRequest, googleResponse, promptGoogleLogin] =
+    Google.useIdTokenAuthRequest({
+      webClientId: googleWebClientId || 'google-web-client-id-not-configured',
+      androidClientId: googleAndroidClientId || 'google-android-client-id-not-configured',
+      iosClientId: googleIosClientId || 'google-ios-client-id-not-configured',
+      selectAccount: true,
+    }, { scheme: 'tempize' });
+
+  useEffect(() => {
+    if (!googleResponse) return;
+
+    if (googleResponse.type === 'success') {
+      const idToken =
+        googleResponse.params.id_token || googleResponse.authentication?.idToken;
+      if (!idToken) {
+        setLocalError('Google n’a pas retourné de jeton d’identification.');
+        setGoogleLoading(false);
+        return;
+      }
+
+      googleLogin(idToken)
+        .then(() => router.replace('/(tabs)/swipe'))
+        .catch((err: Error) => {
+          setLocalError(err.message || 'La connexion Google a échoué.');
+        })
+        .finally(() => setGoogleLoading(false));
+    } else if (googleResponse.type === 'error') {
+      setLocalError('La connexion Google a échoué. Réessaie.');
+      setGoogleLoading(false);
+    } else {
+      setGoogleLoading(false);
+    }
+  }, [googleResponse, googleLogin, router]);
+
+  const handleGoogleLogin = async () => {
+    setLocalError(null);
+    clearError();
+
+    if (!googleClientIdConfigured) {
+      setLocalError('La connexion Google n’est pas encore configurée pour cette plateforme.');
+      return;
+    }
+    if (!googleRequest) {
+      setLocalError('La connexion Google est en cours de préparation. Réessaie dans un instant.');
+      return;
+    }
+
+    setGoogleLoading(true);
+    try {
+      const result = await promptGoogleLogin();
+      if (result.type === 'cancel' || result.type === 'dismiss') {
+        setGoogleLoading(false);
+      } else if (result.type === 'error') {
+        setLocalError('La connexion Google a échoué. Réessaie.');
+        setGoogleLoading(false);
+      }
+    } catch (err: any) {
+      setLocalError(err.message || 'Impossible de démarrer la connexion Google.');
+      setGoogleLoading(false);
+    }
+  };
 
   const handleLogin = async () => {
     setLocalError(null);
@@ -119,14 +194,35 @@ export default function LoginScreen() {
 
           {/* Bouton Connexion */}
           <TouchableOpacity
-            style={[styles.primaryButton, isLoading && styles.disabledButton]}
+            style={[styles.primaryButton, (isLoading || googleLoading) && styles.disabledButton]}
             onPress={handleLogin}
-            disabled={isLoading}
+            disabled={isLoading || googleLoading}
           >
             {isLoading ? (
               <ActivityIndicator color="#FFF" />
             ) : (
               <Text style={styles.primaryButtonText}>Se connecter</Text>
+            )}
+          </TouchableOpacity>
+
+          <View style={styles.separator}>
+            <View style={styles.separatorLine} />
+            <Text style={styles.separatorText}>ou</Text>
+            <View style={styles.separatorLine} />
+          </View>
+
+          <TouchableOpacity
+            style={[styles.googleButton, (isLoading || googleLoading) && styles.disabledButton]}
+            onPress={handleGoogleLogin}
+            disabled={isLoading || googleLoading}
+          >
+            {googleLoading ? (
+              <ActivityIndicator color="#FFF" />
+            ) : (
+              <>
+                <Ionicons name="logo-google" size={18} color="#FFF" />
+                <Text style={styles.googleButtonText}>Continuer avec Google</Text>
+              </>
             )}
           </TouchableOpacity>
 
@@ -244,6 +340,37 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 15,
     fontWeight: '700',
+  },
+  separator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginVertical: 2,
+  },
+  separatorLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#333',
+  },
+  separatorText: {
+    color: '#888',
+    fontSize: 13,
+  },
+  googleButton: {
+    height: 48,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#444',
+    backgroundColor: '#1E1E1E',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+  },
+  googleButtonText: {
+    color: '#FFF',
+    fontSize: 15,
+    fontWeight: '600',
   },
   footerRow: {
     flexDirection: 'row',

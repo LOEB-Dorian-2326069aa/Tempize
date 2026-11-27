@@ -2,8 +2,13 @@ import { useEffect } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { StyleSheet } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 import { useAuthStore } from '../store/authStore';
+import * as WebBrowser from 'expo-web-browser';
+
+if (Platform.OS === 'web' && typeof window !== 'undefined') {
+  WebBrowser.maybeCompleteAuthSession();
+}
 
 export default function RootLayout() {
   const { isAuthenticated } = useAuthStore();

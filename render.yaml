@@ -23,6 +23,8 @@ services:
         value: api/v1
       - key: DB_SYNCHRONIZE
         value: "true"
+      - key: GOOGLE_CLIENT_IDS
+        sync: false
       - key: POSTGRES_HOST
         fromDatabase:
           name: tempize-postgres-db

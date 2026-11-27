@@ -28,6 +28,7 @@ interface AuthState {
   location: { latitude: number; longitude: number };
 
   login: (email: string, mot_de_passe: string) => Promise<void>;
+  googleLogin: (idToken: string) => Promise<void>;
   register: (data: {
     prenom: string;
     nom?: string;
@@ -58,6 +59,26 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const res = await api.post<{ access_token: string; user: UserProfile }>(
         '/auth/login',
         { email, mot_de_passe },
+      );
+      setAuthToken(res.access_token);
+      set({
+        token: res.access_token,
+        user: res.user,
+        isAuthenticated: true,
+        isLoading: false,
+      });
+    } catch (err: any) {
+      set({ error: err.message, isLoading: false });
+      throw err;
+    }
+  },
+
+  googleLogin: async (idToken: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      const res = await api.post<{ access_token: string; user: UserProfile }>(
+        '/auth/google',
+        { idToken },
       );
       setAuthToken(res.access_token);
       set({

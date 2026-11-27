@@ -34,8 +34,8 @@ export class User {
   @Column({ name: 'email', type: 'varchar', length: 255, unique: true })
   email: string;
 
-  @Column({ name: 'mot_de_passe', type: 'varchar', length: 255, select: false })
-  mot_de_passe: string;
+  @Column({ name: 'mot_de_passe', type: 'varchar', length: 255, nullable: true, select: false })
+  mot_de_passe: string | null;
 
   @Column({ name: 'date_naissance', type: 'date', nullable: true })
   date_naissance: Date;

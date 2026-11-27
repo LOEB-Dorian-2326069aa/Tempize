@@ -138,18 +138,29 @@ export default function EventsScreen() {
   };
 
   const modifierEvenement = (event: Evenement) => {
-    Alert.alert(
-      "Modifier l'événement",
-      `L'édition de "${event.titre}" sera disponible lorsque la route de modification sera intégrée.`
-    );
+    const id = event.id_evenement ?? event.id;
+
+    if (id == null) {
+      console.error("Identifiant d'événement manquant.");
+      return;
+    }
+
+    router.push({
+      pathname: "/edit-event/[id]",
+      params: { id: String(id) },
+    });
   };
 
-  const publierActualite = (event: Evenement) => {
-    Alert.alert(
-      "Publier une actualité",
-      `La publication d'actualités pour "${event.titre}" sera ajoutée prochainement.`
-    );
-  };
+ const publierActualite = (event: Evenement) => {
+  const id = event.id_evenement ?? event.id;
+
+  if (id == null) return;
+
+  router.push({
+    pathname: "/manage-event/[id]",
+    params: { id: String(id) },
+  });
+};
 
   // Carte d'événement
   const renderEvenement = (event: Evenement, index: number) => {

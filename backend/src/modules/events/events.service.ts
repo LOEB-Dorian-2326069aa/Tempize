@@ -14,6 +14,8 @@ import { CreateEventDto } from './dto/create-event.dto';
 import { FeedQueryDto } from './dto/feed-query.dto';
 import { StatutEvenement, StatutParticipation, TypeAcces } from '../../common/enums';
 import { RedisService } from '../../config/redis.service';
+import { BadRequestException } from '@nestjs/common';
+import { UpdateEventDto } from './dto/update-event.dto';
 
 @Injectable()
 export class EventsService {
@@ -81,6 +83,136 @@ export class EventsService {
 
     return savedEvent;
   }
+
+
+  async update(
+    user: User,
+    id: number,
+    dto: UpdateEventDto,
+  ): Promise<Event> {
+    const event = await this.eventRepository.findOne({
+      where: { id_evenement: id },
+      relations: ['tags'],
+    });
+
+    if (!event) {
+      throw new NotFoundException('Événement introuvable');
+    }
+
+    // Seul l'organisateur peut modifier son événement
+    if (event.id_organisateur !== user.id_utilisateur) {
+      throw new ForbiddenException(
+        "Tu n'es pas autorisé à modifier cet événement.",
+      );
+    }
+
+    // Calculer les nouvelles dates
+    const nouvelleDateDebut = dto.date_debut
+      ? new Date(dto.date_debut)
+      : event.date_debut;
+
+    const nouvelleDateFin = dto.date_fin
+      ? new Date(dto.date_fin)
+      : event.date_fin;
+
+    if (
+      !Number.isFinite(nouvelleDateDebut.getTime()) ||
+      !Number.isFinite(nouvelleDateFin.getTime()) ||
+      nouvelleDateFin <= nouvelleDateDebut
+    ) {
+      throw new BadRequestException(
+        "La date de fin doit être après la date de début.",
+      );
+    }
+
+    // Vérifier les coordonnées
+    const latitude = dto.latitude ?? Number(event.latitude);
+    const longitude = dto.longitude ?? Number(event.longitude);
+
+    if (
+      !Number.isFinite(latitude) ||
+      !Number.isFinite(longitude) ||
+      latitude < -90 ||
+      latitude > 90 ||
+      longitude < -180 ||
+      longitude > 180
+    ) {
+      throw new BadRequestException(
+        'Coordonnées GPS invalides.',
+      );
+    }
+
+    // Empêcher de réduire les places sous le nombre
+    // de participations déjà acceptées
+    if (dto.nb_places_max !== undefined) {
+      const inscrits = await this.participationRepository.count({
+        where: {
+          id_evenement: id,
+          statut_participation: StatutParticipation.ACCEPTE,
+        },
+      });
+
+      if (dto.nb_places_max < inscrits) {
+        throw new BadRequestException(
+          `Impossible de descendre sous ${inscrits} inscrits.`,
+        );
+      }
+    }
+
+    // Modifier uniquement les champs autorisés
+    if (dto.titre !== undefined) {
+      event.titre = dto.titre;
+    }
+
+    if (dto.description !== undefined) {
+      event.description = dto.description;
+    }
+
+    if (dto.adresse !== undefined) {
+      event.adresse = dto.adresse;
+    }
+
+    if (dto.nb_places_max !== undefined) {
+      event.nb_places_max = dto.nb_places_max;
+    }
+
+    if (dto.type_acces !== undefined) {
+      event.type_acces = dto.type_acces;
+    }
+
+    event.date_debut = nouvelleDateDebut;
+    event.date_fin = nouvelleDateFin;
+
+    event.latitude = latitude;
+    event.longitude = longitude;
+
+    // Synchroniser la position PostGIS
+    event.location = {
+      type: 'Point',
+      coordinates: [longitude, latitude],
+    };
+
+    // Modifier les tags seulement si fournis
+    if (dto.tag_ids !== undefined) {
+      event.tags = dto.tag_ids.length
+        ? await this.tagRepository.findBy({
+            id_tag: In(dto.tag_ids),
+          })
+        : [];
+    }
+
+    const savedEvent = await this.eventRepository.save(event);
+
+    // Invalider le cache Redis si nécessaire
+    try {
+      await this.redisService.del('feed:*');
+    } catch (error) {
+      this.logger.warn('Impossible d’invalider le cache du feed');
+    }
+
+    return savedEvent;
+  }
+
 
   async getFeed(user: User, query: FeedQueryDto) {
     // Règle Freemium CDC : 15km max pour les comptes gratuits

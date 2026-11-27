@@ -15,6 +15,8 @@ import { FeedQueryDto } from './dto/feed-query.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
+import { Patch } from '@nestjs/common';
+import { UpdateEventDto } from './dto/update-event.dto';
 
 @ApiTags('Events')
 @Controller('events')
@@ -47,6 +49,21 @@ export class EventsController {
   @ApiResponse({ status: 200, description: 'Événements organisés et participations' })
   async getMyEvents(@CurrentUser() user: User) {
     return this.eventsService.getUserEvents(user.id_utilisateur);
+  }
+
+  @Patch(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Modifier un événement organisé' })
+  @ApiResponse({ status: 200, description: 'Événement modifié' })
+  @ApiResponse({ status: 403, description: 'Modification non autorisée' })
+  @ApiResponse({ status: 404, description: 'Événement introuvable' })
+  async update(
+    @CurrentUser() user: User,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateEventDto,
+  ) {
+    return this.eventsService.update(user, id, dto);
   }
 
   @Get(':id')

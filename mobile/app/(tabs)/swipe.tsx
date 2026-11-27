@@ -152,13 +152,21 @@ export default function SwipeScreen() {
   });
 
   const participerBadgeStyle = useAnimatedStyle(() => {
-    const opacity = interpolate(translateX.value, [20, SWIPE_THRESHOLD], [0, 1]);
-    return { opacity };
+    const opacity = interpolate(translateX.value, [15, SWIPE_THRESHOLD * 0.75], [0, 1]);
+    const scale = interpolate(translateX.value, [0, SWIPE_THRESHOLD], [0.85, 1.05]);
+    return {
+      opacity,
+      transform: [{ rotate: '-8deg' }, { scale }],
+    };
   });
 
   const passerBadgeStyle = useAnimatedStyle(() => {
-    const opacity = interpolate(translateX.value, [-SWIPE_THRESHOLD, -20], [1, 0]);
-    return { opacity };
+    const opacity = interpolate(translateX.value, [-SWIPE_THRESHOLD * 0.75, -15], [1, 0]);
+    const scale = interpolate(translateX.value, [-SWIPE_THRESHOLD, 0], [1.05, 0.85]);
+    return {
+      opacity,
+      transform: [{ rotate: '8deg' }, { scale }],
+    };
   });
 
   const handleRewind = () => {
@@ -220,15 +228,18 @@ export default function SwipeScreen() {
             {/* Carte principale */}
             <GestureDetector gesture={panGesture}>
               <Animated.View style={[styles.card, animatedCardStyle]}>
-                {/* Badge PARTICIPER */}
-                <Animated.View style={[styles.swipeBadge, styles.participerBadge, participerBadgeStyle]}>
-                  <Text style={styles.participerBadgeText}>PARTICIPER</Text>
-                </Animated.View>
+                {/* Overlay central de feedback de swipe */}
+                <View style={styles.centerBadgeOverlay} pointerEvents="none">
+                  {/* Coeur (swipe droite - Participer) */}
+                  <Animated.View style={[styles.centerIconCircle, styles.centerHeartCircle, participerBadgeStyle]}>
+                    <Ionicons name="heart" size={38} color={Colors.prune} />
+                  </Animated.View>
 
-                {/* Badge PASSER */}
-                <Animated.View style={[styles.swipeBadge, styles.passerBadge, passerBadgeStyle]}>
-                  <Text style={styles.passerBadgeText}>PASSER</Text>
-                </Animated.View>
+                  {/* Croix (swipe gauche - Passer) */}
+                  <Animated.View style={[styles.centerIconCircle, styles.centerCrossCircle, passerBadgeStyle]}>
+                    <Ionicons name="close" size={40} color={Colors.secondaire} />
+                  </Animated.View>
+                </View>
 
                 {/* Image placeholder */}
                 <View style={styles.cardImage}>
@@ -508,38 +519,40 @@ const styles = StyleSheet.create({
     fontSize: Typography.body,
     color: Colors.secondaire,
   },
-  swipeBadge: {
+  centerBadgeOverlay: {
     position: 'absolute',
-    top: Spacing.md,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: 8,
-    borderRadius: Radius.md,
-    borderWidth: 2,
-    zIndex: 20,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 50,
   },
-  participerBadge: {
-    left: Spacing.md,
+  centerIconCircle: {
+    position: 'absolute',
+    width: 76,
+    height: 76,
+    borderRadius: 38,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 3,
+    backgroundColor: 'rgba(255, 255, 255, 0.96)',
+    ...Shadows.card,
+  },
+  centerHeartCircle: {
     borderColor: Colors.prune,
-    backgroundColor: `${Colors.prune}20`,
-    transform: [{ rotate: '-10deg' }],
+    shadowColor: Colors.prune,
+    shadowOpacity: 0.35,
+    shadowRadius: 16,
+    elevation: 10,
   },
-  participerBadgeText: {
-    color: Colors.prune,
-    fontWeight: Typography.bold,
-    fontSize: 15,
-    letterSpacing: 1,
-  },
-  passerBadge: {
-    right: Spacing.md,
+  centerCrossCircle: {
     borderColor: Colors.secondaire,
-    backgroundColor: `${Colors.secondaire}20`,
-    transform: [{ rotate: '10deg' }],
-  },
-  passerBadgeText: {
-    color: Colors.secondaire,
-    fontWeight: Typography.bold,
-    fontSize: 15,
-    letterSpacing: 1,
+    shadowColor: Colors.secondaire,
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 10,
   },
   actions: {
     flexDirection: 'row',

@@ -80,7 +80,7 @@ Assurez-vous d'avoir installé sur votre machine :
 
 ---
 
-### 2. Étape 1 : Lancer la Base de Données & le Cache (Docker)
+### 2. Étape 1 : Lancer la Base de Données, le Cache & Seeder les Données
 Depuis la racine du projet :
 ```powershell
 docker compose up -d
@@ -90,13 +90,22 @@ Cette commande démarre automatiquement en arrière-plan :
 - **Redis 7** sur le port `6379`
 - **pgAdmin 4** sur le port `5051`
 
----
-
-### 3. Étape 2 : Lancer le Backend API (NestJS)
-Ouvrez un terminal :
+#### 🌱 Peupler la base de données (Seeding des données de test)
+Pour générer un grand jeu de données réalistes pour l'application (utilisateurs avec avatars, événements géolocalisés à Paris, participations, swipes et tags) :
 ```powershell
 cd backend
 npm install
+npm run seed
+```
+> 💡 **Infos pratiques :**
+> - Le mot de passe de test pour tous les comptes créés est **`Password123!`** (ex: `lea@tempize.dev`, `lucas@tempize.dev`).
+> - Les données sont persistées dans les volumes Docker : vous n'avez pas besoin de relancer le seed à chaque redémarrage de Docker. Relancez-le uniquement si vous souhaitez réinitialiser la base (`docker compose down -v`) ou repartir sur un jeu de données propre.
+
+---
+
+### 3. Étape 2 : Lancer le Backend API (NestJS)
+Depuis le dossier `backend` :
+```powershell
 npm run start:dev
 ```
 - L'API démarre sur : **`http://localhost:3000/api/v1`**
@@ -116,11 +125,19 @@ npm run web
 
 ---
 
+### Connexion Google (Web et mobile)
+
+Créez des identifiants OAuth Web, Android et iOS dans Google Cloud Console. Ajoutez leurs ID dans `mobile/.env` (`EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`, `EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID`, `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID`) et dans `backend/.env` (`GOOGLE_CLIENT_IDS`, séparés par des virgules). L’ID Web historique `EXPO_PUBLIC_GOOGLE_CLIENT_ID` reste accepté en repli pour le navigateur.
+
+Pour le Web, autorisez l’origine locale `http://localhost:8081` ainsi que le domaine de production dans le client OAuth Web. Pour les applications natives, configurez le nom de package Android et le bundle identifier iOS déjà déclarés dans `mobile/app.json`, puis lancez une development build (Expo Go ne connaît pas le schéma natif `tempize://`). Le backend valide le jeton Google avant de créer le compte ou de connecter l’utilisateur existant à la même adresse vérifiée.
+
+---
+
 ## 🌐 URLs des Services Locaux
 
 | Service | URL locale | Identifiants par défaut |
 |---|---|---|
-| 📱 **Application Web** | `http://localhost:8081` | — |
+| 📱 **Application Web** | `http://localhost:8081` | — |V
 | 🚀 **API Backend** | `http://localhost:3000/api/v1` | — |
 | 📚 **Swagger Documentation** | `http://localhost:3000/api/docs` | — |
 | 🖥️ **pgAdmin 4** | `http://localhost:5051` | `admin@tempize.dev` / `admin` |

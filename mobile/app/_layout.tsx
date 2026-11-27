@@ -6,6 +6,22 @@ import { StyleSheet } from 'react-native';
 import { Colors } from '../constants/theme';
 
 export default function RootLayout() {
+  const { isAuthenticated } = useAuthStore();
+  const segments = useSegments();
+  const router = useRouter();
+
+  useEffect(() => {
+    const inAuthGroup = segments[0] === '(auth)';
+
+    if (!isAuthenticated && !inAuthGroup) {
+      // Compte obligatoire : redirection immédiate vers l'authentification
+      router.replace('/(auth)/login');
+    } else if (isAuthenticated && inAuthGroup) {
+      // Connecté : accès direct à l'application
+      router.replace('/(tabs)/swipe');
+    }
+  }, [isAuthenticated, segments]);
+
   return (
     <GestureHandlerRootView style={styles.container}>
       <SafeAreaProvider>

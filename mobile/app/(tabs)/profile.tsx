@@ -33,6 +33,14 @@ const MENU_SECTIONS = [
 ];
 
 export default function ProfileScreen() {
+  const router = useRouter();
+  const { user, isAuthenticated, logout } = useAuthStore();
+
+  const handleLogout = () => {
+    logout();
+    router.replace('/(auth)/login');
+  };
+
   return (
     <View style={styles.container}>
       <AppHeader title="Profil" rightIcon="settings-outline" />
@@ -179,6 +187,10 @@ const styles = StyleSheet.create({
     fontWeight: Typography.bold,
     color: Colors.encre,
   },
+  userEmail: {
+    fontSize: 13,
+    color: '#888',
+  },
   userBio: {
     fontSize: Typography.body,
     color: Colors.secondaire,
@@ -244,6 +256,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: Spacing.sm,
+  },
+  emptyTagsText: {
+    color: '#666',
+    fontSize: 13,
   },
   tagPill: {
     paddingHorizontal: 14,

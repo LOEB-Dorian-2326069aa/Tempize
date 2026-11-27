@@ -120,7 +120,7 @@ npm run web
 
 | Service | URL locale | Identifiants par défaut |
 |---|---|---|
-| 📱 **Application Web** | `http://localhost:8081` | — |
+| 📱 **Application Web** | `http://localhost:8081` | — |V
 | 🚀 **API Backend** | `http://localhost:3000/api/v1` | — |
 | 📚 **Swagger Documentation** | `http://localhost:3000/api/docs` | — |
 | 🖥️ **pgAdmin 4** | `http://localhost:5051` | `admin@tempize.dev` / `admin` |

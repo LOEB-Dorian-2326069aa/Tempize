@@ -31,7 +31,11 @@ export default function TabsLayout() {
           title: 'Découvrir',
           headerTitle: 'Tempize',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="flame" size={size} color={color} />
+            <Ionicons
+              name="flame"
+              size={size}
+              color={typeof color === 'string' ? color : '#888888'}
+            />
           ),
         }}
       />
@@ -41,7 +45,11 @@ export default function TabsLayout() {
           title: 'Carte',
           headerTitle: 'Événements autour de moi',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="map" size={size} color={color} />
+            <Ionicons
+              name="map"
+              size={size}
+              color={typeof color === 'string' ? color : '#888888'}
+            />
           ),
         }}
       />
@@ -51,7 +59,11 @@ export default function TabsLayout() {
           title: 'Mes Sorties',
           headerTitle: 'Mes Événements',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="calendar" size={size} color={color} />
+            <Ionicons
+              name="calendar"
+              size={size}
+              color={typeof color === 'string' ? color : '#888888'}
+            />
           ),
         }}
       />
@@ -61,7 +73,11 @@ export default function TabsLayout() {
           title: 'Profil',
           headerTitle: 'Mon Profil',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person" size={size} color={color} />
+            <Ionicons
+              name="person"
+              size={size}
+              color={typeof color === 'string' ? color : '#888888'}
+            />
           ),
         }}
       />

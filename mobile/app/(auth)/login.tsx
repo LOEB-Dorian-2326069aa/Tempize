@@ -20,6 +20,12 @@ const googleWebClientId =
   process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID;
 const googleAndroidClientId = process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID;
 const googleIosClientId = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID;
+const googleAndroidClientIdPrefix = googleAndroidClientId?.match(
+  /^(.+)\.apps\.googleusercontent\.com$/,
+)?.[1];
+const googleAndroidRedirectUri = googleAndroidClientIdPrefix
+  ? `com.googleusercontent.apps.${googleAndroidClientIdPrefix}:/oauth2redirect/google`
+  : undefined;
 const googleClientIdConfigured =
   Platform.OS === 'web'
     ? Boolean(googleWebClientId)
@@ -41,6 +47,8 @@ export default function LoginScreen() {
       webClientId: googleWebClientId || 'google-web-client-id-not-configured',
       androidClientId: googleAndroidClientId || 'google-android-client-id-not-configured',
       iosClientId: googleIosClientId || 'google-ios-client-id-not-configured',
+      redirectUri:
+        Platform.OS === 'android' ? googleAndroidRedirectUri : undefined,
       selectAccount: true,
     }, { scheme: 'tempize' });
 
@@ -82,9 +90,20 @@ export default function LoginScreen() {
       setLocalError('La connexion Google est en cours de préparation. Réessaie dans un instant.');
       return;
     }
+    if (Platform.OS === 'android' && !googleAndroidRedirectUri) {
+      setLocalError('L’identifiant OAuth Android doit être au format client Google.');
+      return;
+    }
 
     setGoogleLoading(true);
     try {
+      if (__DEV__) {
+        console.info('[Google OAuth]', {
+          platform: Platform.OS,
+          clientId: googleRequest.clientId,
+          redirectUri: googleRequest.redirectUri,
+        });
+      }
       const result = await promptGoogleLogin();
       if (result.type === 'cancel' || result.type === 'dismiss') {
         setGoogleLoading(false);

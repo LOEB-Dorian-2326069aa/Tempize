@@ -1,69 +1,41 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Platform } from 'react-native';
+import { Colors, Typography } from '../../constants/theme';
 
+/**
+ * Layout des onglets — Expo Router Tabs avec tabBar native cachée.
+ * Chaque écran déclare son propre <BottomNav /> pour la navigation.
+ * Les écrans sont déclarés ici pour qu'Expo Router les connaisse.
+ */
 export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerShown: true,
-        headerStyle: {
-          backgroundColor: '#1A1A1A',
-        },
-        headerTitleStyle: {
-          color: '#FFFFFF',
-          fontWeight: '700',
-        },
-        tabBarStyle: {
-          backgroundColor: '#1A1A1A',
-          borderTopColor: '#2D2D2D',
-          height: Platform.OS === 'ios' ? 88 : 64,
-          paddingBottom: Platform.OS === 'ios' ? 28 : 10,
-          paddingTop: 8,
-        },
-        tabBarActiveTintColor: '#FF4D67',
-        tabBarInactiveTintColor: '#888888',
+        headerShown: false,
+        // On cache la tabBar native — BottomNav custom est dans chaque écran
+        tabBarStyle: { display: 'none' },
       }}
     >
       <Tabs.Screen
         name="swipe"
-        options={{
-          title: 'Découvrir',
-          headerTitle: 'Tempize',
-          tabBarIcon: (props: any) => (
-            <Ionicons name="flame" size={props.size} color={props.color} />
-          ),
-        }}
+        options={{ title: 'Découvrir' }}
       />
       <Tabs.Screen
-        name="map"
-        options={{
-          title: 'Carte',
-          headerTitle: 'Événements autour de moi',
-          tabBarIcon: (props: any) => (
-            <Ionicons name="map" size={props.size} color={props.color} />
-          ),
-        }}
+        name="create"
+        options={{ title: 'Créer' }}
       />
       <Tabs.Screen
         name="events"
-        options={{
-          title: 'Mes Sorties',
-          headerTitle: 'Mes Événements',
-          tabBarIcon: (props: any) => (
-            <Ionicons name="calendar" size={props.size} color={props.color} />
-          ),
-        }}
+        options={{ title: 'Événements' }}
       />
       <Tabs.Screen
         name="profile"
-        options={{
-          title: 'Profil',
-          headerTitle: 'Mon Profil',
-          tabBarIcon: (props: any) => (
-            <Ionicons name="person" size={props.size} color={props.color} />
-          ),
-        }}
+        options={{ title: 'Profil' }}
+      />
+      <Tabs.Screen
+        name="map"
+        options={{ title: 'Carte', href: null }}
       />
     </Tabs>
   );

@@ -6,7 +6,10 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
-    "scheme": "tempize",
+    "scheme": [
+      "tempize",
+      "com.googleusercontent.apps.196086882562-l41asv1koual28irc90gd0pcoihqli5k"
+    ],
     "splash": {
       "resizeMode": "contain",
       "backgroundColor": "#121212"
